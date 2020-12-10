@@ -1,0 +1,31 @@
+---
+- import_tasks: create-network.yml
+  vars:
+    vn_public_domain: "{{ cluster_name }}.{{ public_domain }}"
+    vn_master_count: "{{ master_count }}"
+    vn_compute_count: "{{ compute_count }}"
+    vm_network: "{{ cluster_name }}"
+    vm_network_internal: "{{ cluster_name }}-internal"
+  tags: network
+
+- name: Create master nodes
+  include: create-vm.yml
+  vars:
+    vm_instance_name: "{{ cluster_name }}-master-{{ item }}"
+    vm_network: "{{ cluster_name }}"
+    vm_network_internal: "{{ cluster_name }}-internal"
+    vm_mac_address: "52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + item|int) }}"
+    vm_vcpu: "{{ master_vcpu }}"
+    vm_special_cpu: "{{ master_special_cpu | default('') }}"
+    vm_memory_size: "{{ master_memory_size }}"
+    vm_memory_unit: "{{ master_memory_unit }}"
+    vm_root_disk_size: "{{ master_root_disk_size }}"
+  with_sequence: start=0 end="{{ master_count|int - 1 }}" stride=1
+
+- name: Create master nodes
+  include: add-vm-disks.yml
+  vars:
+    vm_instance_name: "{{ cluster_name }}-master-{{ item }}"
+    vm_data_disk_size: "128G"
+  with_sequence: start=0 end="{{ master_count|int - 1 }}" stride=1
+

@@ -1,0 +1,9 @@
+---
+cluster_name: ai-bm-demo
+public_domain: clustership.com
+dns_provider: dnsimple
+
+master_vcpu: 16
+master_memory_size: 49152
+
+vn_subnet: "192.168.70.0"
