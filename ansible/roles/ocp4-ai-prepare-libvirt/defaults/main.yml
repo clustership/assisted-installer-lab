@@ -16,6 +16,9 @@ master_memory_unit: 'MiB'
 #   You may use k, M, G, T, P or E suffixe
 master_root_disk_size: '120G'
 
-compute_count: 2
+worker_count: 2
+worker_root_disk_size: '120G'
+worker_memory_size: 16384
+worker_memory_unit: 'MiB'
 
 vm_autostart: false

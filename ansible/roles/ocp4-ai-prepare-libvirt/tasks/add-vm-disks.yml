@@ -6,11 +6,13 @@
   command: "qemu-img create -f qcow2 /var/lib/libvirt/images/{{ vm_instance_name }}-data.qcow2 +{{ vm_data_disk_size }}"
   args:
     creates: "/var/lib/libvirt/images/{{ vm_instance_name }}-data.qcow2"
+  register: add_disk
 
-- name: Start VirtualMachine {{ vm_instance_name }}
+- name: attach data disk to VirtualMachine {{ vm_instance_name }}
   command: |
     virsh attach-disk {{ vm_instance_name }} \
       --source /var/lib/libvirt/images/{{ vm_instance_name }}-data.qcow2 \
       --target vdb \
       --subdriver qcow2 \
       --persistent
+  when: add_disk is defined and add_disk.stdout.find('Formatting') != -1

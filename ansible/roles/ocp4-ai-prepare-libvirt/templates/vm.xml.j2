@@ -41,7 +41,7 @@
     </disk>
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
-      <source file="/var/lib/tftpboot/_iso/ai_rhcos.iso"/>
+      <source file="{{ discovery_iso }}"/>
       <target dev='hdc' bus='ide'/>
       <readonly/>
       <address type='drive' controller='0' bus='1' unit='0'/>

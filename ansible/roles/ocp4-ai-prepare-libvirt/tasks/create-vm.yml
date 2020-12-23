@@ -13,6 +13,10 @@
     command: define
     xml: "{{ lookup('template', 'templates/vm.xml.j2') }}"
 
+- name: Create data disk
+  include: add-vm-disks.yml
+  when: vm_create_data_disk
+
 - name: Start VirtualMachine {{ vm_instance_name }}
   virt: 
     name: "{{ vm_instance_name }}"

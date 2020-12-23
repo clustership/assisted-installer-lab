@@ -8,8 +8,13 @@
         </host>
         <host ip='{{ vn_subnet.split('.')[:3] | join('.')}}.1'>
             <hostname>host.{{ vn_internal_domain }}</hostname>
+        </host>
+        <host ip='{{ vn_subnet.split('.')[:3] | join('.')}}.161'>
             <hostname>api-int.{{ vn_public_domain }}</hostname>
             <hostname>api.{{ vn_public_domain }}</hostname>
+        </host>
+        <host ip='{{ vn_subnet.split('.')[:3] | join('.')}}.65'>
+            <hostname>.apps.{{ vn_public_domain }}</hostname>
             {% if dns_provider == 'none' %}
             <hostname>oauth-openshift.apps.{{ vn_public_domain }}</hostname>
             {% endif %}
@@ -31,8 +36,8 @@
             {% for id in range(0, vn_master_count | int) -%}
             <host mac='52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + id) }}' name='master-{{ id }}.{{ vn_internal_domain }}' ip='{{ vn_subnet.split('.')[:3] | join('.')}}.{{ 10 + id }}'/>
             {% endfor -%}
-            {% for id in range(0, vn_compute_count | int) -%}
-            <host mac='52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + vn_master_count|int + id) }}' name='compute-{{ id }}.{{ vn_internal_domain }}' ip='{{ vn_subnet.split('.')[:3] | join('.')}}.{{ 10 + vn_master_count|int + id }}'/>
+            {% for id in range(0, vn_worker_count | int) -%}
+            <host mac='52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + vn_master_count|int + id) }}' name='worker-{{ id }}.{{ vn_internal_domain }}' ip='{{ vn_subnet.split('.')[:3] | join('.')}}.{{ 10 + vn_master_count|int + id }}'/>
             {% endfor %}
 
         </dhcp>
