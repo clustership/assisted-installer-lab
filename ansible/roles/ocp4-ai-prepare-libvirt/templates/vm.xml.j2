@@ -13,6 +13,7 @@
 {% if vm_special_cpu is defined and vm_special_cpu|length %}
   {{ vm_special_cpu }}
 {% endif %}
+  <cpu mode='host-passthrough'/>
   <os>
     <type arch="x86_64">hvm</type>
     <boot dev="hd"/>

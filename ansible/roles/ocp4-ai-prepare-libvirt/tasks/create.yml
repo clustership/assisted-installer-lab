@@ -36,5 +36,5 @@
     vm_memory_unit: "{{ worker_memory_unit }}"
     vm_root_disk_size: "{{ worker_root_disk_size }}"
     vm_data_disk_size: "128G"
-    vm_create_data_disk: true
+    vm_create_data_disk: "{{ worker_vm_create_data_disk }}"
   with_sequence: start=0 end="{{ worker_count|int - 1 }}" stride=1

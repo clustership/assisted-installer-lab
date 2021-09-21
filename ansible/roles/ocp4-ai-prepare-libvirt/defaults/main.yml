@@ -10,7 +10,7 @@ listen_address: "{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
 
 master_count: 3
 master_vcpu: 4
-master_memory_size: 16384
+master_memory_size: 8192
 master_memory_unit: 'MiB'
 # qemu-img image size specified.
 #   You may use k, M, G, T, P or E suffixe
@@ -18,7 +18,9 @@ master_root_disk_size: '120G'
 
 worker_count: 2
 worker_root_disk_size: '120G'
-worker_memory_size: 16384
+worker_memory_size: 24576
 worker_memory_unit: 'MiB'
 
-vm_autostart: false
+worker_vm_create_data_disk: false
+
+vm_autostart: true
