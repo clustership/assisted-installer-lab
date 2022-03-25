@@ -1,3 +1,10 @@
 <network>
-    <name>{{ vm_network_internal }}</name>
+  <name>{{ vm_network_internal }}</name>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <domain name='{{ vm_network_internal }}'/>
+  <ip address='{{ vm_subnet | ipaddr('next_usable') }}' netmask='255.255.255.0'>
 </network>

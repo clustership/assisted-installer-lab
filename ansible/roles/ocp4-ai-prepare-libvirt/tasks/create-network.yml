@@ -4,47 +4,16 @@
 #     src: templates/network.xml.j2
 #     dest: network.xml     
 
-- name: Define network {{ cluster_name }}
-  virt_net:
-    command: define
-    name: "{{ cluster_name }}"
-    xml: "{{ lookup('template', 'templates/network.xml.j2') }}"
+- name: Define network {{ cluster_name }}-baremetal-net
+  include_tasks: create-network-internal.yml
+  vars:
+    vm_network_name: "{{ cluster_name }}-baremetal-net"
+    vm_network_type: baremetal
+    vm_subnet: "{{ vn_baremetal_subnet }}"
 
-- name: Active network {{ cluster_name }}
-  virt_net:
-    state: active
-    name: "{{ cluster_name }}"
-
-- name: Activate autostart network {{ cluster_name }}
-  virt_net:
-    autostart: yes
-    name: "{{ cluster_name }}"
-
-- name: Add network to internal network zone
-  firewalld:
-    source: "{{ vn_subnet }}/24"
-    zone: internal
-    state: enabled
-    permanent: yes
-  notify: 'reload firewalld'
-  when: ansible_distribution == "RedHat" and ansible_distribution_major_version == '7'
-
-- name: firewalld reload
-  command: firewall-cmd --reload
-  when: ansible_distribution == "RedHat" and ansible_distribution_major_version == '7'
-
-- name: Define internal network {{ vm_network_internal }}
-  virt_net:
-    command: define
-    name: "{{ vm_network_internal }}"
-    xml: "{{ lookup('template', 'templates/network-internal.xml.j2') }}"
-
-- name: Active network {{ vm_network_internal }}
-  virt_net:
-    state: active
-    name: "{{ vm_network_internal }}"
-
-- name: Activate autostart network {{ vm_network_internal }}
-  virt_net:
-    autostart: yes
-    name: "{{ vm_network_internal }}"
+- name: Define network {{ cluster_name }}-provisioning-net
+  include_tasks: create-network-internal.yml
+  vars:
+    vm_network_name: "{{ cluster_name }}-provisioning-net"
+    vm_network_type: provisioning
+    vm_subnet: "{{ vn_provisioning_subnet }}"

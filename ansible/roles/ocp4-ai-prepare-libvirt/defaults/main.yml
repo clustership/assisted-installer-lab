@@ -9,18 +9,18 @@ vn_public_domain: "h42.openshift.pub"
 listen_address: "{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
 
 master_count: 3
-master_vcpu: 4
-master_memory_size: 8192
+master_vcpu: 12
+master_memory_size: 32768
 master_memory_unit: 'MiB'
 # qemu-img image size specified.
 #   You may use k, M, G, T, P or E suffixe
 master_root_disk_size: '120G'
 
-worker_count: 2
+worker_count: 0
 worker_root_disk_size: '120G'
 worker_memory_size: 24576
 worker_memory_unit: 'MiB'
 
 worker_vm_create_data_disk: false
 
-vm_autostart: true
+vm_autostart: false

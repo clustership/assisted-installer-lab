@@ -40,13 +40,13 @@
       <source file='/var/lib/libvirt/images/{{ vm_instance_name }}.qcow2'/>
       <target dev='vda' bus='virtio'/>
     </disk>
-    <disk type='file' device='cdrom'>
+    <!-- disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
       <source file="{{ discovery_iso }}"/>
       <target dev='hdc' bus='ide'/>
       <readonly/>
       <address type='drive' controller='0' bus='1' unit='0'/>
-    </disk>
+    </disk -->
     <controller type="usb" index="0" model="ich9-ehci1"/>
     <controller type="usb" index="0" model="ich9-uhci1">
       <master startport="0"/>
@@ -58,12 +58,13 @@
       <master startport="4"/>
     </controller>
     <interface type='network'>
-      <mac address='{{ vm_mac_address  }}'/>
-      <source network='{{ vm_network }}'/>
+      <mac address='{{ vm_mac_address_provisioning  }}'/>
+      <source network='{{ vm_network }}-provisioning-net'/>
       <model type='virtio'/>
     </interface>
     <interface type='network'>
-      <source network='{{ vm_network_internal }}'/>
+      <mac address='{{ vm_mac_address  }}'/>
+      <source network='{{ vm_network }}-baremetal-net'/>
       <model type='virtio'/>
     </interface>
     <graphics type="vnc" port="-1"/>

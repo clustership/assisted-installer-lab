@@ -1,40 +1,65 @@
 ---
+# - import_tasks: create-pool.yml
+#   vars:
+#     pool_name: "{{ cluster_name }}-pool"
+#   tags: pool
+
 - import_tasks: create-network.yml
   vars:
     vn_public_domain: "{{ cluster_name }}.{{ public_domain }}"
     vn_master_count: "{{ master_count }}"
     vn_worker_count: "{{ worker_count }}"
     vm_network: "{{ cluster_name }}"
-    vm_network_internal: "{{ cluster_name }}-internal"
   tags: network
+
+- name: Create provisioning VM
+  include: create-vm.yml
+  vars:
+    vm_instance_name: "{{ cluster_name }}-provisioning"
+    vm_network: "{{ cluster_name }}"
+    vm_mac_address: "52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (5|int) }}"
+    vm_mac_address_provisioning: "52:54:00:{{ '%02x' % (vn_subnet.split('.')[1]|int + 1) }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (5|int) }}"
+    vm_vcpu: "4"
+    vm_special_cpu: "{{ master_special_cpu | default('') }}"
+    vm_memory_size: "8192"
+    vm_memory_unit: "{{ master_memory_unit }}"
+    vm_root_disk_size: "64G"
+    vm_create_data_disk: false
+    discovery_iso: /var/lib/libvirt/images/rhel-8.5-x86_64-boot.iso
+    bmc_user: admin
+    bmc_password: bobleponge
+    bmc_port: 6349
 
 - name: Create master nodes
   include: create-vm.yml
   vars:
     vm_instance_name: "{{ cluster_name }}-master-{{ item }}"
     vm_network: "{{ cluster_name }}"
-    vm_network_internal: "{{ cluster_name }}-internal"
-    vm_mac_address: "52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + item|int) }}"
+    vm_mac_address: "52:54:00:{{ '%02x' % vn_baremetal_subnet.split('.')[1]|int }}:{{ '%02x' % vn_baremetal_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + item|int) }}"
+    vm_mac_address_provisioning: "52:54:00:{{ '%02x' % (vn_provisioning_subnet.split('.')[1]|int + 1) }}:{{ '%02x' % vn_provisioning_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + item|int) }}"
     vm_vcpu: "{{ master_vcpu }}"
     vm_special_cpu: "{{ master_special_cpu | default('') }}"
     vm_memory_size: "{{ master_memory_size }}"
     vm_memory_unit: "{{ master_memory_unit }}"
     vm_root_disk_size: "{{ master_root_disk_size }}"
     vm_create_data_disk: false
+    bmc_user: admin
+    bmc_password: bobleponge
+    bmc_port: "{{ 6350 + item|int }}"
   with_sequence: start=0 end="{{ master_count|int - 1 }}" stride=1
 
-- name: Create worker nodes
-  include: create-vm.yml
-  vars:
-    vm_instance_name: "{{ cluster_name }}-worker-{{ item }}"
-    vm_network: "{{ cluster_name }}"
-    vm_network_internal: "{{ cluster_name }}-internal"
-    vm_mac_address: "52:54:00:{{ '%02x' % vn_subnet.split('.')[1]|int }}:{{ '%02x' % vn_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + master_count|int + item|int) }}"
-    vm_vcpu: "{{ worker_vcpu }}"
-    vm_special_cpu: "{{ worker_special_cpu | default('') }}"
-    vm_memory_size: "{{ worker_memory_size }}"
-    vm_memory_unit: "{{ worker_memory_unit }}"
-    vm_root_disk_size: "{{ worker_root_disk_size }}"
-    vm_data_disk_size: "128G"
-    vm_create_data_disk: "{{ worker_vm_create_data_disk }}"
-  with_sequence: start=0 end="{{ worker_count|int - 1 }}" stride=1
+- block:
+  - name: Create worker nodes
+    include: create-vm.yml
+    vars:
+      vm_instance_name: "{{ cluster_name }}-worker-{{ item }}"
+      vm_network: "{{ cluster_name }}"
+      vm_mac_address: "52:54:00:{{ '%02x' % vn_baremetal_subnet.split('.')[1]|int }}:{{ '%02x' % vn_baremetal_subnet.split('.')[2]|int }}:{{ '%02x' % (10 + master_count|int + item|int) }}"
+      vm_mac_address_provisioning: "52:54:00:{{ '%02x' % (vn_provisioning_subnet.split('.')[1]|int + 1) }}:{{ '%02x' % vn_provisioning_subnet.split('.')[2]|int }}:{{ '%02x' % (5|int) }}"
+      vm_vcpu: "{{ worker_vcpu }}"
+      vm_special_cpu: "{{ worker_special_cpu | default('') }}"
+      vm_memory_size: "{{ worker_memory_size }}"
+      vm_memory_unit: "{{ worker_memory_unit }}"
+      vm_root_disk_size: "{{ worker_root_disk_size }}"
+    with_sequence: start=0 end="{{ worker_count|int - 1 if worker_count|int > 0 else 0  }}" stride=1
+  when: worker_count|int > 0

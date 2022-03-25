@@ -13,12 +13,14 @@
     command: define
     xml: "{{ lookup('template', 'templates/vm.xml.j2') }}"
 
-- name: Create data disk
-  include: add-vm-disks.yml
-  when: vm_create_data_disk
+- name: "Register bmc interface for {{ vm_instance_name }}"
+  command: "/usr/local/bin/vbmc add {{ vm_instance_name }} --port {{ bmc_port }} --username {{ bmc_user }} --password {{ bmc_password }} --libvirt-uri {{ libvirt_uri | default('qemu:///system') }}"
 
-- name: Start VirtualMachine {{ vm_instance_name }}
-  virt: 
-    name: "{{ vm_instance_name }}"
-    state: running
-    autostart: "{{ vm_autostart }}"
+- name: "Start bmc interface for {{ vm_instance_name }}"
+  command: "/usr/local/bin/vbmc start {{ vm_instance_name }}"
+
+# - name: Start VirtualMachine {{ vm_instance_name }}
+#   virt: 
+#     name: "{{ vm_instance_name }}"
+#     state: running
+#     autostart: "{{ vm_autostart }}"
